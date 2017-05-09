@@ -1,0 +1,13 @@
+
+digraph flow {
+  
+  node [shape=box];
+  imgTag [label="image tag"];
+  txt2diagram [label="txt2diagram"];
+  file [label="diagram file"];
+
+  imgTag -> txt2diagram [taillabel="GET url=diagram files url"]
+  txt2diagram -> file [taillabel="GET"]
+  file -> txt2diagram [taillabel="txt" labeldistance=3]
+  txt2diagram -> imgTag [taillabel="svg" labeldistance=3]
+}
