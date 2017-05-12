@@ -1,0 +1,68 @@
+provider "aws" {
+	region = "us-east-2"
+}
+variable "ssh_public_key" {}
+variable "ssh_private_key" {}
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"]
+  }
+  owners = ["099720109477"] # canonical
+}
+
+resource "aws_key_pair" "txt2diagram" {
+  key_name = "txt2diagram-prod-key"
+  public_key = "${var.ssh_public_key}"
+}
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_instance" "web" {
+  ami = "${data.aws_ami.ubuntu.id}"
+  instance_type = "t2.small"
+  key_name = "txt2diagram-prod-key"
+  tags {
+    Name = "txt2diagram"
+  }
+#  provisioner "remote-exec" {
+#    connection {
+#      type = "ssh"
+#    }
+#    inline = [
+#      "sudo apt-get update",
+#      "sudo apt-get upgrade -y",
+#      "echo ok"
+#    ]
+#  }
+
+}
+
+resource "aws_eip" "web" {
+  instance = "${aws_instance.web.id}"
+}
+
+resource "aws_security_group" "txt2diagram" {
+  name = "txt2diagram"
+  ingress { 
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+output "web-public-ip" {
+  value = "${aws_eip.web.public_ip}"
+}
