@@ -5,7 +5,7 @@ ENV NAME "defaultapname"
 RUN mkdir /graphviz
 RUN apk add --update graphviz ttf-dejavu
 RUN apk add curl python py-pip jq vim
-RUN pip install bottle
+RUN pip install bottle requests
 
 ADD ./app/webserver.py /app/webserver.py
 

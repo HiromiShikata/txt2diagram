@@ -1,5 +1,6 @@
-from bottle import Bottle, HTTPResponse
+from bottle import Bottle, HTTPResponse, request
 import os
+import requests
 
 VERSION='0.0.1'
 BOTTLEIP='0.0.0.0'
@@ -8,11 +9,16 @@ BOTTLEPORT='8500'
 APP = Bottle(__name__)
 
 
-@APP.route('/', method=['OPTIONS', 'GET'])
+@APP.route('/')
 def index():
     try:
+        url=request.query.url
+        print(url)
         apname = os.environ['NAME']
-        body= {'version': VERSION, 'apname': apname}
+        r = requests.get(url)
+        print(r.text)
+        body= {'version': VERSION, 'apname': apname, 'url': url, 'text': r.text}
+
         response = HTTPResponse(status=200, body=body)
         return response
     except Exception as err:
